@@ -1,43 +1,40 @@
 pipeline {
     agent any
-    tools {
-        maven 'Maven'  // Maven configured in Jenkins Global Tools
-        jdk 'JDK11'    // JDK configured in Jenkins Global Tools
-    }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-repo.git'
+                git branch: 'main', url: 'https://github.com/your-nodejs-repository.git'
             }
         }
-
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                sh 'npm run build'
             }
         }
-
-        stage('Test') {
+        stage('Deploy') {
             steps {
-                sh 'mvn test'
-            }
-        }
-
-        stage('Package') {
-            steps {
-                sh 'mvn package'
+                sh 'scp -r dist/ user@server:/path/to/deploy'
             }
         }
     }
 
     post {
         success {
-            echo 'Build completed successfully.'
+            echo 'Node.js app deployed successfully!'
         }
         failure {
-            echo 'Build failed. Check logs for details.'
+            echo 'Pipeline failed.'
         }
     }
 }
-
